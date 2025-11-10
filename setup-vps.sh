@@ -1,6 +1,6 @@
 #!/bin/bash
 # One-Command VPS Setup Script for ytdlbot
-# Run: curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/ytdlbot-vps-setup/main/setup.sh | bash
+# Run: curl -fsSL https://raw.githubusercontent.com/TheBizarreAbhishek/ytdlbot/master/setup-vps.sh | bash
 
 set -e
 
