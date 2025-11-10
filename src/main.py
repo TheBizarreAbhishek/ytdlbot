@@ -19,6 +19,7 @@ from typing import Any
 import psutil
 import pyrogram.errors
 import yt_dlp
+from yt_dlp.utils import DownloadError
 from apscheduler.schedulers.background import BackgroundScheduler
 from pyrogram import Client, enums, filters, types
 
@@ -378,6 +379,20 @@ def download_handler(client: Client, message: types.Message):
         time.sleep(e.value)
     except ValueError as e:
         message.reply_text(e.__str__(), quote=True)
+    except yt_dlp.utils.DownloadError as e:
+        error_msg = str(e)
+        logging.error("Download failed: %s", error_msg, exc_info=True)
+        if "Sign in to confirm you're not a bot" in error_msg or "cookies" in error_msg.lower():
+            message.reply_text(
+                "❌ YouTube requires authentication. Please set up cookies:\n\n"
+                "1. Export cookies from your browser\n"
+                "2. Upload as 'youtube-cookies.txt' to the bot directory\n"
+                "3. Or add POTOKEN to .env file\n\n"
+                "See COOKIES_SETUP.md for details.",
+                quote=True
+            )
+        else:
+            message.reply_text(f"❌ Download failed: {error_msg[:200]}", quote=True)
     except Exception as e:
         logging.error("Download failed", exc_info=True)
         message.reply_text(f"❌ Download failed: {e}", quote=True)
