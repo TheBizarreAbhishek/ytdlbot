@@ -106,11 +106,23 @@ class YoutubeDownload(BaseDownloader):
         }
         # setup cookies for youtube only
         if is_youtube(self._url):
-            # use cookies from browser firstly
-            if browsers := os.getenv("BROWSERS"):
-                ydl_opts["cookiesfrombrowser"] = browsers.split(",")
+            # Use youtube-cookies.txt if available (preferred over browser cookies)
             if os.path.isfile("youtube-cookies.txt") and os.path.getsize("youtube-cookies.txt") > 100:
                 ydl_opts["cookiefile"] = "youtube-cookies.txt"
+            # use cookies from browser only if BROWSERS is set and browser exists
+            elif browsers := os.getenv("BROWSERS"):
+                # Check if Firefox profile directories exist before trying to use browser cookies
+                browser_list = browsers.split(",")
+                firefox_paths = [
+                    os.path.expanduser("~/.mozilla/firefox"),
+                    os.path.expanduser("~/snap/firefox/common/.mozilla/firefox"),
+                    os.path.expanduser("~/.var/app/org.mozilla.firefox/.mozilla/firefox"),
+                ]
+                # Only use browser cookies if at least one browser path exists
+                if any(os.path.exists(path) for path in firefox_paths) or "firefox" not in browser_list:
+                    ydl_opts["cookiesfrombrowser"] = browser_list
+                else:
+                    logging.warning("Firefox not found, skipping browser cookie extraction. Use youtube-cookies.txt instead.")
             # try add extract_args if present
             if potoken := os.getenv("POTOKEN"):
                 ydl_opts["extractor_args"] = {"youtube": ["player-client=web,default", f"po_token=web+{potoken}"]}

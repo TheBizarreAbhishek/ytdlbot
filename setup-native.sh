@@ -84,14 +84,23 @@ if [ ! -f ".env" ]; then
         exit 1
     fi
     
-    # Create .env file with SQLite (simpler than MySQL)
+    echo ""
+    echo -e "${YELLOW}Optional: Restrict bot access?${NC}"
+    echo "Leave AUTHORIZED_USER empty to allow everyone to use the bot."
+    echo "Or enter Telegram User IDs (comma-separated) to restrict access."
+    echo "Example: 123456789,987654321"
+    read -p "Enter AUTHORIZED_USER (press Enter to allow everyone): " AUTHORIZED_USER_LIST
+    
+    # Create .env file with SQLite (simpler than MySQL, no password needed)
+    # Note: BROWSERS is not set by default - browser cookies are optional
+    # If you want to use browser cookies, install Firefox and set BROWSERS=firefox in .env
     cat > .env << EOF
 WORKERS=100
 APP_ID=$APP_ID
 APP_HASH=$APP_HASH
 BOT_TOKEN=8247631826:AAE_zYrmB1C6umRufEM3SMr7ytC7eAMCcsA
 OWNER=$USER_ID
-AUTHORIZED_USER=
+AUTHORIZED_USER=$AUTHORIZED_USER_LIST
 DB_DSN=sqlite:///db.sqlite
 REDIS_HOST=
 ENABLE_FFMPEG=True
